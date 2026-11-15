@@ -60,7 +60,44 @@
         @keyframes moverPieza { 0% { transform: scale(0.8); opacity: 0.5; } 50% { transform: scale(1.1); } 100% { transform: scale(1); opacity: 1; } }
         
         #modal-ajustes { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center; }
-    </style>
+   /* --- DISEÑO PARA TELÉFONOS (Responsive) --- */
+@media (max-width: 900px) {
+    /* Cambiamos la vista de 3 columnas a 1 sola columna vertical */
+    #contenedor-juego { 
+        flex-direction: column; 
+        align-items: center; 
+        gap: 10px;
+        padding: 10px;
+    }
+
+    /* Achicamos un poco el tablero para que quepa en el celular */
+    #tablero { 
+        grid-template-columns: repeat(8, 42px); 
+        grid-template-rows: repeat(8, 42px); 
+    }
+    .casilla { font-size: 32px; }
+
+    /* Achicamos las letras del tablero */
+    .tablero-wrapper { 
+        grid-template-columns: 15px 336px; 
+        grid-template-rows: 336px 15px; 
+    }
+    .coord-fila { grid-template-rows: repeat(8, 42px); font-size: 10px;}
+    .coord-col { grid-template-columns: repeat(8, 42px); font-size: 10px;}
+
+    /* Hacemos los paneles más anchos para que quepan en la pantalla */
+    .panel-lateral, .panel-historial { 
+        width: 90%; 
+        max-width: 400px;
+    }
+    .foto-rival { width: 80px; height: 80px; }
+    .nombre-rival { font-size: 18px; }
+    .dificultad-rival { font-size: 12px; }
+
+    /* Ajustamos el menú principal */
+    .btn-nivel { width: 130px; padding: 10px; }
+    .avatar { width: 80px; height: 80px; }
+} </style>
 </head>
 <body>
     <audio id="musica-fondo" loop>
