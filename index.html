@@ -2,211 +2,223 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>El Desafío de Kuro - Ajedrez Pro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Kuro Academy - Ajedrez</title>
     <link rel="icon" type="image/png" href="kuro.png">
+    <link rel="manifest" href="manifest.json">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
     <style>
-        body { background-color: #121212; color: white; font-family: sans-serif; margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; }
-        header { display: flex; justify-content: space-between; padding: 10px 20px; background-color: #1e1e1e; border-bottom: 2px solid #333; }
-        header h1 { margin: 0; font-size: 24px; color: #f44336; }
+        body { background: linear-gradient(135deg, #2b1d14 0%, #1a110b 100%); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; transition: background 0.5s; }
+        body { user-select: none; -webkit-user-select: none; }
+        header { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background-color: #1e1e1e; border-bottom: 2px solid #333; }
+        header h1 { margin: 0; font-size: 20px; color: #f44336; }
+        .header-right { display: flex; gap: 15px; align-items: center; }
+        .coins-display { background: #ff9800; color: #111; padding: 5px 10px; border-radius: 15px; font-weight: bold; font-size: 14px; cursor: pointer; }
         .btn-ajustes { background: none; border: none; color: white; font-size: 24px; cursor: pointer; }
-        
-        #menu-principal { display: flex; flex-direction: column; align-items: center; justify-content: center; flex-grow: 1; text-align: center; }
-        #menu-principal h2 { color: #ff9800; margin-bottom: 30px;}
-        .niveles { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
-        .btn-nivel { padding: 15px; font-size: 16px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; color: white; background-color: #2a2a2a; border: 2px solid transparent; width: 150px; display: flex; flex-direction: column; align-items: center; gap: 5px;}
-        .btn-nivel span { font-size: 12px; font-weight: normal; opacity: 0.8;}
-        .avatar { width: 100px; height: 100px; object-fit: cover; object-position: top; border-radius: 50%; border: 3px solid #555; margin-bottom: 10px; background-color: #000; }
-        #btn-yami:hover { border-color: #4CAF50; box-shadow: 0 0 15px #4CAF50; }
-        #btn-hikaru:hover { border-color: #FFC107; box-shadow: 0 0 15px #FFC107; }
-        #btn-kuro:hover { border-color: #f44336; box-shadow: 0 0 15px #f44336; }
-        #btn-humano:hover { border-color: #2196F3; box-shadow: 0 0 15px #2196F3; }
+.tablero-volteado {
+    transform: rotate(180deg);
+}
+.tablero-volteado .casilla, .tablero-volteado .coord-fila, .tablero-volteado .coord-col {
+    transform: rotate(180deg);
+}
+
+        /* TABLEROS */
+        .tablero-clasico .blanca { background-color: #eeddcc; } .tablero-clasico .negra { background-color: #2e5d3e; }
+        .tablero-madera .blanca { background-color: #d2b48c; } .tablero-madera .negra { background-color: #8b5a2b; }
+        .tablero-marmol .blanca { background-color: #e0e0e0; } .tablero-marmol .negra { background-color: #7f8c8d; }
+        .tablero-neon .blanca { background-color: #111; } .tablero-neon .negra { background-color: #00bcd4; }
+        .tablero-oceano .blanca { background-color: #f4d03f; } .tablero-oceano .negra { background-color: #2980b9; }
+        .tablero-sangre .blanca { background-color: #333; } .tablero-sangre .negra { background-color: #8b0000; }
+
+        /* MENU Y JUEGO */
+        #menu-principal { display: flex; flex-direction: column; align-items: center; justify-content: center; flex-grow: 1; text-align: center; padding: 20px; position: relative; }
+        .menu-controls { position: absolute; top: 20px; right: 20px; display: flex; flex-direction: column; gap: 10px; }
+        .menu-controls button { background: #333; border: 2px solid #555; padding: 10px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; color: white; }
+        .menu-controls button:hover { border-color: #f44336; }
+
+        .niveles { display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; max-width: 900px; margin-top: 50px; }
+        .btn-nivel { padding: 10px; font-size: 14px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; color: white; background-color: #2a2a2a; border: 2px solid transparent; width: 130px; display: flex; flex-direction: column; align-items: center; gap: 5px; transition: 0.2s; }
+        .btn-nivel:hover { transform: scale(1.05); border-color: #f44336; }
+        .btn-nivel span { font-size: 11px; opacity: 0.8; }
+        .avatar { width: 80px; height: 80px; object-fit: cover; object-position: top; border-radius: 50%; border: 3px solid #555; margin-bottom: 5px; background-color: #000; }
 
         #contenedor-juego { display: none; flex-grow: 1; padding: 20px; gap: 20px; justify-content: center; }
         .panel-lateral { width: 200px; background-color: #1e1e1e; border-radius: 10px; padding: 15px; display: flex; flex-direction: column; align-items: center; border: 1px solid #333; }
-        .foto-rival { width: 120px; height: 120px; border-radius: 50%; border: 3px solid #f44336; object-fit: cover; object-position: top; margin-bottom: 10px;}
-        .nombre-rival { font-size: 20px; font-weight: bold; color: #fff; margin-bottom: 5px;}
-        .dificultad-rival { font-size: 14px; color: #ff9800; font-weight: bold; margin-bottom: 15px;}
-        .capturas { width: 100%; font-size: 30px; text-align: center; min-height: 40px; word-wrap: break-word;}
-        
+        .foto-rival { width: 120px; height: 120px; border-radius: 50%; border: 3px solid #f44336; object-fit: cover; object-position: top; margin-bottom: 10px; }
+        .nombre-rival { font-size: 20px; font-weight: bold; color: #fff; margin-bottom: 5px; }
+        .dificultad-rival { font-size: 14px; color: #ff9800; font-weight: bold; margin-bottom: 15px; }
+        .capturas { width: 100%; font-size: 30px; text-align: center; min-height: 40px; word-wrap: break-word; }
+
         .panel-central { display: flex; flex-direction: column; align-items: center; }
         .tablero-wrapper { display: grid; grid-template-columns: 20px 520px; grid-template-rows: 520px 20px; gap: 5px; }
-        #tablero { display: grid; grid-template-columns: repeat(8, 65px); grid-template-rows: repeat(8, 65px); border: 4px solid #333; border-radius: 5px; }
+        #tablero { display: grid; grid-template-columns: repeat(8, 65px); grid-template-rows: repeat(8, 65px); border: 15px solid #3e2723; border-radius: 8px; box-shadow: 0 15px 30px rgba(0,0,0,0.8), inset 0 0 10px rgba(0,0,0,0.5); background-color: #3e2723; }
         .casilla { display: flex; align-items: center; justify-content: center; font-size: 50px; cursor: pointer; user-select: none; }
-        .blanca { background-color: #eeddcc; color: #111; }
-        .negra { background-color: #2e5d3e; color: #111; }
-        .pieza-negra { color: #000 !important; text-shadow: 1px 1px 2px rgba(255,255,255,0.3); }
-        .pieza-blanca { color: #fff !important; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
+        .pieza-negra { color: #000000 !important; text-shadow: none; }
+        .pieza-blanca { color: #ffffff !important; text-shadow: none; }
         .seleccionada { background-color: #d4af37 !important; box-shadow: inset 0 0 15px #fff; }
-        
+        .movimiento-posible { box-shadow: inset 0 0 10px #4CAF50; }
+
         .coord-fila { display: grid; grid-template-rows: repeat(8, 65px); align-items: center; justify-content: center; font-size: 14px; color: #888; }
         .coord-col { display: grid; grid-template-columns: repeat(8, 65px); align-items: center; justify-items: center; font-size: 14px; color: #888; }
-        
-        #mensaje-kuro { margin-top: 10px; font-size: 20px; color: #ff9800; font-weight: bold; height: 30px; text-align: center;}
+
+        #mensaje-kuro { margin-top: 10px; font-size: 18px; color: #ff9800; font-weight: bold; min-height: 40px; text-align: center; padding: 0 10px; }
         .controles { margin-top: 15px; display: flex; gap: 15px; }
         button { padding: 10px 20px; font-size: 16px; font-weight: bold; border: none; border-radius: 5px; cursor: pointer; color: white; }
-        #btn-reiniciar { background-color: #4CAF50; }
-        #btn-ayuda { background-color: #2196F3; }
-        #btn-menu { background-color: #555; }
-        
+        #btn-reiniciar { background-color: #4CAF50; } #btn-ayuda { background-color: #2196F3; } #btn-menu { background-color: #555; }
+
         .panel-historial { width: 200px; background-color: #1e1e1e; border-radius: 10px; padding: 15px; border: 1px solid #333; overflow-y: auto; max-height: 550px; }
-        .panel-historial h3 { margin-top: 0; text-align: center; color: #fff; border-bottom: 1px solid #333; padding-bottom: 10px;}
-        .lista-movimientos { display: grid; grid-template-columns: 30px 1fr 1fr; gap: 5px; font-size: 14px;}
-        .mov-num { color: #888; }
-        .mov-blanco { color: #fff; font-weight: bold;}
-        .mov-negro { color: #f44336; font-weight: bold;}
-        
+        .panel-historial h3 { margin-top: 0; text-align: center; color: #fff; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        .lista-movimientos { display: grid; grid-template-columns: 30px 1fr 1fr; gap: 5px; font-size: 14px; }
+        .mov-num { color: #888; } .mov-blanco { color: #fff; font-weight: bold; } .mov-negro { color: #f44336; font-weight: bold; }
+
         .animacion-mover { animation: moverPieza 0.4s ease-in-out; }
         @keyframes moverPieza { 0% { transform: scale(0.8); opacity: 0.5; } 50% { transform: scale(1.1); } 100% { transform: scale(1); opacity: 1; } }
+
+        /* MODALES */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; flex-direction: column; }
+        .modal-content { background: #1e1e1e; padding: 30px; border-radius: 10px; width: 90%; max-width: 400px; border: 2px solid #f44336; text-align: center; max-height: 80vh; overflow-y: auto; }
+        .modal-content h2 { color: #ff9800; margin-top: 0; }
+        .modal-content button { background-color: #f44336; width: 100%; margin-top: 20px; }
         
-       /* --- DISEÑO PARA TELÉFONOS (Responsive) --- */
-@media (max-width: 900px) {
-    #contenedor-juego { 
-        flex-direction: column !important; 
-        align-items: center !important; 
-        gap: 10px !important;
-        padding: 10px !important;
-        display: flex !important;
-    }
+        .social-icons { display: flex; justify-content: center; gap: 15px; margin: 15px 0; flex-wrap: wrap; }
+        .social-icons a { color: white; font-size: 24px; text-decoration: none; transition: 0.3s; }
+        .social-icons a:hover { color: #f44336; }
+        .terms-section { text-align: left; font-size: 12px; margin-bottom: 15px; }
+        .terms-section a { color: #2196F3; cursor: pointer; text-decoration: underline; }
 
-    #tablero { 
-        grid-template-columns: repeat(8, 42px) !important; 
-        grid-template-rows: repeat(8, 42px) !important; 
-    }
-    
-    .casilla { 
-        font-size: 32px !important; 
-    }
-
-    .tablero-wrapper { 
-        grid-template-columns: 15px 336px !important; 
-        grid-template-rows: 336px 15px !important; 
-    }
-    
-    .coord-fila { grid-template-rows: repeat(8, 42px) !important; font-size: 10px !important; }
-    .coord-col { grid-template-columns: repeat(8, 42px) !important; font-size: 10px !important; }
-
-    .panel-lateral, .panel-historial { 
-        width: 90% !important; 
-        max-width: 400px !important;
-        margin-top: 10px !important;
-    }
-    
-    .foto-rival { width: 80px !important; height: 80px !important; }
-    .nombre-rival { font-size: 18px !important; }
-    .dificultad-rival { font-size: 12px !important; }
-
-    .btn-nivel { width: 130px !important; padding: 10px !important; }
-    .avatar { width: 80px !important; height: 80px !important; }
-}
-    
-
-    #tablero { 
-        grid-template-columns: repeat(8, 42px); 
-        grid-template-rows: repeat(8, 42px); 
-    }
-    .casilla { font-size: 32px; }
-
-    .tablero-wrapper { 
-        grid-template-columns: 15px 336px; 
-        grid-template-rows: 336px 15px; 
-    }
-    .coord-fila { grid-template-rows: repeat(8, 42px); font-size: 10px;}
-    .coord-col { grid-template-columns: repeat(8, 42px); font-size: 10px;}
-
-    .panel-lateral, .panel-historial { 
-        width: 90%; 
-        max-width: 400px;
-    }
-    .foto-rival { width: 80px; height: 80px; }
-    .nombre-rival { font-size: 18px; }
-    .dificultad-rival { font-size: 12px; }
-
-    .btn-nivel { width: 130px; padding: 10px; }
-    .avatar { width: 80px; height: 80px; }
-</style>
+        @media (max-width: 900px) {
+            #contenedor-juego { flex-direction: column !important; align-items: center !important; gap: 10px !important; padding: 10px !important; display: flex !important; }
+            #tablero { grid-template-columns: repeat(8, 42px) !important; grid-template-rows: repeat(8, 42px) !important; }
+            .casilla { font-size: 32px !important; }
+            .tablero-wrapper { grid-template-columns: 15px 336px !important; grid-template-rows: 336px 15px !important; }
+            .coord-fila { grid-template-rows: repeat(8, 42px) !important; font-size: 10px !important; }
+            .coord-col { grid-template-columns: repeat(8, 42px) !important; font-size: 10px !important; }
+            .panel-lateral, .panel-historial { width: 90% !important; max-width: 400px !important; margin-top: 10px !important; }
+            .menu-controls { position: static; margin-bottom: 20px; flex-direction: row; justify-content: center; }
+        }
+    </style>
 </head>
 <body>
-    <audio id="musica-fondo" loop>
-        <source src="musica_kuro.mp3" type="audio/mpeg">
-    </audio>
+    <audio id="musica-fondo" src="musica_kuro.mp3" loop></audio>
 
     <header>
-        <h1>El Desafío de Kuro</h1>
-        <button class="btn-ajustes" onclick="abrirAjustes()" title="Ajustes">⚙️</button>
+        <h1>Kuro Academy</h1>
+        <div class="header-right">
+            <div class="coins-display" onclick="alert('Muy pronto podrás usar esta opción')">🪙 0</div>
+            <button class="btn-ajustes" onclick="abrirModal('modal-ajustes')">⚙️</button>
+        </div>
     </header>
-    
-    <div id="modal-ajustes">
-        <div style="background-color: #1e1e1e; padding: 30px; border-radius: 10px; width: 300px; border: 2px solid #f44336; text-align: center;">
-            <h2 style="color: #ff9800; margin-top: 0;">⚙️ Ajustes</h2>
-            <label style="display: block; margin-bottom: 10px;">Volumen Música:</label>
-            <input type="range" id="vol-musica" min="0" max="1" step="0.1" value="0.3" style="width: 100%; margin-bottom: 20px;">
-            <label style="display: block; margin-bottom: 10px;">Volumen Voces:</label>
-            <input type="range" id="vol-voces" min="0" max="1" step="0.1" value="1" style="width: 100%; margin-bottom: 20px;">
-            <div style="border-top: 1px solid #333; padding-top: 15px; margin-bottom: 20px;">
-                <p style="margin: 0; font-size: 14px; color: #aaa;">Creado por:</p>
-                <p style="margin: 5px 0; font-size: 18px; font-weight: bold; color: #fff;">Luis Nava</p>
-                <p style="margin: 0; font-size: 12px; color: #888;">Proyecto Kuro Academy</p>
+
+    <!-- MODAL AJUSTES -->
+    <div id="modal-ajustes" class="modal">
+        <div class="modal-content">
+            <h2>⚙️ Ajustes</h2>
+            <label>Volumen Música:</label>
+            <input type="range" id="vol-musica" min="0" max="1" step="0.1" value="0.3" style="width: 100%; margin-bottom: 10px;">
+            <label>Volumen Voces:</label>
+            <input type="range" id="vol-voces" min="0" max="1" step="0.1" value="1" style="width: 100%; margin-bottom: 15px;">
+            
+            <label>Música de Fondo:</label>
+            <select id="selector-musica" style="width: 100%; padding: 5px; margin-bottom: 15px;">
+                <option value="musica_kuro.mp3">Kuro Theme</option>
+                <option value="ieberch_piano.mp3">Piano Triste</option>
+                <option value="the_mountain.mp3">The Mountain</option>
+                <option value="studiokolomna_no_copyright.mp3">Suspenso</option>
+                <option value="danyvin_suspenseful.mp3">Tensión</option>
+            </select>
+<label>Jugar con:</label>
+<select id="selector-color" style="width: 100%; padding: 5px; margin-bottom: 15px;">
+    <option value="w">Blancas</option>
+    <option value="b">Negras</option>
+</select>
+            <div style="font-size: 14px; margin: 10px 0;">Creador: Luis Nava</div>
+            
+            <div class="social-icons">
+                <a href="https://www.tiktok.com/@kuro_academy53" target="_blank">🎵</a>
+                <a href="https://www.bilibili.com/" target="_blank">📺</a>
+                <a href="https://www.instagram.com/kuro_Academy9" target="_blank">📷</a>
+                <a href="https://twitter.com/@kuroAcademrd1c" target="_blank">🐦</a>
+                <a href="https://www.pixiv.net/" target="_blank">🎨</a>
             </div>
-            <button onclick="cerrarAjustes()" style="background-color: #f44336; width: 100%;">Cerrar</button>
+
+            <div class="terms-section">
+                <a onclick="alert('Al usar este juego aceptas que es un proyecto de entretenimiento. El creador no se hace responsable por el uso indebido del mismo.')">Términos de Uso</a><br>
+                <a onclick="alert('No recopilamos datos personales en esta versión. Los Kuro Coins son virtuales y no tienen valor monetario real aún.')">Política de Privacidad</a>
+            </div>
+
+            <button onclick="instalarApp()" style="background: #2196F3; margin-bottom: 10px;">📲 Instalar App</button>
+            <button onclick="cerrarModal('modal-ajustes')">Cerrar</button>
         </div>
     </div>
 
+    <!-- MODAL TABLEROS -->
+    <div id="modal-tableros" class="modal">
+        <div class="modal-content">
+            <h2>Elige tu Tablero</h2>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px;">
+                <button onclick="cambiarTablero('clasico')" style="background: #eeddcc; color: #111; margin:0;">Clásico</button>
+                <button onclick="cambiarTablero('madera')" style="background: #d2b48c; color: #111; margin:0;">Madera</button>
+                <button onclick="cambiarTablero('marmol')" style="background: #e0e0e0; color: #111; margin:0;">Mármol</button>
+                <button onclick="cambiarTablero('neon')" style="background: #00bcd4; color: #111; margin:0;">Neón</button>
+                <button onclick="cambiarTablero('oceano')" style="background: #2980b9; color: #fff; margin:0;">Océano</button>
+                <button onclick="cambiarTablero('sangre')" style="background: #8b0000; color: #fff; margin:0;">Sangre</button>
+            </div>
+            <button onclick="cerrarModal('modal-tableros')">Cerrar</button>
+        </div>
+    </div>
+
+    <!-- MENÚ PRINCIPAL -->
     <div id="menu-principal">
+        <div class="menu-controls">
+            <button onclick="abrirModal('modal-tableros')">🎨 Tableros</button>
+        </div>
         <h2>Selecciona a tu oponente</h2>
         <div class="niveles">
-            <button id="btn-yami" class="btn-nivel" onclick="iniciarJuego('yami')">
-                <img src="yami.png" alt="Yami" class="avatar" onerror="this.style.display='none'">
-                Yami <span>Nivel Fácil</span>
-            </button>
-            <button id="btn-hikaru" class="btn-nivel" onclick="iniciarJuego('hikaru')">
-                <img src="hikaru.png" alt="Hikaru" class="avatar" onerror="this.style.display='none'">
-                Hikaru <span>Nivel Medio</span>
-            </button>
-            <button id="btn-kuro" class="btn-nivel" onclick="iniciarJuego('kuro')">
-                <img src="kuro.png" alt="Kuro" class="avatar" onerror="this.style.display='none'">
-                Kuro <span>Nivel Imposible</span>
-            </button>
-            <button id="btn-humano" class="btn-nivel" onclick="iniciarJuego('humano')">
-                <div class="avatar" style="display:flex; align-items:center; justify-content:center; font-size:40px;">👥</div>
-                Humano <span>2 Jugadores</span>
-            </button>
+            <button class="btn-nivel" onclick="iniciarJuego('daiki')"><img src="daiki.png" class="avatar" onerror="this.style.display='none'">Daiki <span>Nivel Fácil</span></button>
+            <button class="btn-nivel" onclick="iniciarJuego('rem')"><img src="rem.png" class="avatar" onerror="this.style.display='none'">Rem <span>Nivel Fácil</span></button>
+            <button class="btn-nivel" onclick="iniciarJuego('yami')"><img src="yami.png" class="avatar" onerror="this.style.display='none'">Yami <span>Nivel Medio</span></button>
+            <button class="btn-nivel" onclick="iniciarJuego('hikaru')"><img src="hikaru.png" class="avatar" onerror="this.style.display='none'">Hikaru <span>Avanzado</span></button>
+            <button class="btn-nivel" onclick="iniciarJuego('shira')"><img src="shira.png" class="avatar" onerror="this.style.display='none'">Shira <span>Avanzado</span></button>
+            <button class="btn-nivel" onclick="iniciarJuego('kuro')"><img src="kuro.png" class="avatar" onerror="this.style.display='none'">Kuro <span>Imposible</span></button>
+            <button class="btn-nivel" onclick="iniciarJuego('humano')"><div class="avatar" style="display:flex; align-items:center; justify-content:center; font-size:40px;">👥</div>Humano <span>2 Jugadores</span></button>
         </div>
     </div>
 
+    <!-- JUEGO -->
     <div id="contenedor-juego">
         <div class="panel-lateral">
             <img id="foto-rival-panel" src="kuro.png" class="foto-rival" onerror="this.style.display='none'">
             <div id="nombre-rival-panel" class="nombre-rival">Kuro</div>
-            <div id="nivel-rival-panel" class="dificultad-rival">Nivel Imposible</div>
+            <div id="nivel-rival-panel" class="dificultad-rival">Imposible</div>
             <div style="font-size:12px; color:#888; margin-top: 10px;">Tus capturas:</div>
             <div id="capturas-jugador" class="capturas" style="color: #fff;"></div>
             <div style="font-size:12px; color:#888; margin-top: 10px;">Capturas del rival:</div>
             <div id="capturas-rival" class="capturas" style="color: #f44336;"></div>
         </div>
-
         <div class="panel-central">
             <div id="mensaje-kuro">Kuro: "Haz tu movimiento."</div>
             <div class="tablero-wrapper">
                 <div class="coord-fila" id="coords-filas"></div>
-                <div id="tablero"></div>
+                <div id="tablero" class="tablero-clasico"></div>
                 <div></div>
                 <div class="coord-col" id="coords-cols"></div>
             </div>
             <div class="controles">
-                <button id="btn-reiniciar" onclick="reiniciarJuego()">Reiniciar Partida</button>
+                <button id="btn-reiniciar" onclick="reiniciarJuego()">Reiniciar</button>
                 <button id="btn-ayuda" onclick="pedirAyuda()">Ayuda (2)</button>
-                <button id="btn-menu" onclick="volverAlMenu()">Volver al Menú</button>
+                <button id="btn-menu" onclick="volverAlMenu()">Menú</button>
             </div>
         </div>
-
         <div class="panel-historial">
-            <h3>Historial de Jugadas</h3>
+            <h3>Historial</h3>
             <div id="lista-movimientos" class="lista-movimientos"></div>
-        </div><script>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
         const kuroMotor = new Worker('stockfish.js');
         kuroMotor.postMessage('uci');
-        
         const juego = new Chess(); 
         const tableroHTML = document.getElementById('tablero');
         const mensaje = document.getElementById('mensaje-kuro');
@@ -216,40 +228,107 @@
         let piezaSeleccionada = null;
         let ayudasRestantes = 2;
         let nivelActual = 'kuro'; 
+        let colorJugador = 'w';
         let piezasCapturadas = { blancas: [], negras: [] };
-        window.volumenVoces = 1; 
+        let volumenVoces = 1;
+        let mostrarMovimientos = true;
 
+        // Configuración de Personajes (Voces, Elo/Depth, Frases)
         const personajes = {
-            'yami': { nombre: "Yami", dificultad: "Nivel Fácil", profundidad: 1, foto: "yami.png", frases: ["Jaja, ¿eso es todo?", "Te voy a destruir.", "¡Qué aburrido!"] },
-            'hikaru': { nombre: "Hikaru", dificultad: "Nivel Medio", profundidad: 5, foto: "hikaru.png", frases: ["Perfecto, como siempre.", "Un movimiento interesante.", "La belleza siempre gana."] },
-            'kuro': { nombre: "Kuro", dificultad: "Nivel Imposible", profundidad: 12, foto: "kuro.png", frases: ["Predecible.", "Tu turno.", "No hay esperanza.", "Como lo calculé."] },
-            'humano': { nombre: "Jugador 2", dificultad: "Local", profundidad: 0, foto: "", frases: ["Tu turno.", "Buena jugada."] }
+            'daiki': { nombre: "Daiki", dificultad: "Nivel Fácil", profundidad: 1, foto: "daiki.png", pitch: 1.1, frases: ["Veo tu cara de tragedia.", "¿Otra vez perdiste?", "Analizo tu pulso."] },
+            'rem': { nombre: "Rem", dificultad: "Nivel Fácil", profundidad: 2, foto: "rem.png", pitch: 1.0, frases: ["Buena suerte.", "Interesante.", "No te fíes de ella."] },
+            'yami': { nombre: "Yami", dificultad: "Nivel Medio", profundidad: 5, foto: "yami.png", pitch: 1.2, frases: ["¡Te voy a destruir!", "¡Qué aburrido!", "¡Juega más rápido!"] },
+            'hikaru': { nombre: "Hikaru", dificultad: "Avanzado", profundidad: 9, foto: "hikaru.png", pitch: 1.05, frases: ["La belleza gana.", "Perfecto.", "Predecible."] },
+            'shira': { nombre: "Shira", dificultad: "Avanzado", profundidad: 13, foto: "shira.png", pitch: 0.9, frases: ["Como esperaba.", "No es suficiente.", "El trono es mío."] },
+            'kuro': { nombre: "Kuro", dificultad: "Imposible", profundidad: 18, foto: "kuro.png", pitch: 0.8, frases: ["Predecible.", "Tu turno.", "Como lo calculé.", "No hay esperanza."] },
+            'humano': { nombre: "Jugador 2", dificultad: "Local", profundidad: 0, foto: "", pitch: 1.0, frases: [] }
         };
 
-        function abrirAjustes() { document.getElementById('modal-ajustes').style.display = 'flex'; }
-        function cerrarAjustes() { document.getElementById('modal-ajustes').style.display = 'none'; }
-        
-        document.getElementById('vol-musica').addEventListener('input', (e) => { musica.volume = e.target.value; });
-        document.getElementById('vol-voces').addEventListener('input', (e) => { window.volumenVoces = parseFloat(e.target.value); });
+        // Lógica de Nova (El más fácil): Movimientos aleatorios
+        function jugarFacil() {
+            const movimientosPosibles = juego.moves({ verbose: true });
+            if (movimientosPosibles.length === 0) return;
+            const movAleatorio = movimientosPosibles[Math.floor(Math.random() * movimientosPosibles.length)];
+            setTimeout(() => {
+                const movNova = juego.move({ from: movAleatorio.from, to: movAleatorio.to, promotion: 'q' });
+                if (movNova) {
+                    reproducirSonido(movNova.captured ? 'comer' : 'mover');
+                    dibujarTablero(movAleatorio.to);
+                    actualizarHistorialYCapturas(movNova);
+                    if (juego.game_over()) { kuroHabla("¡Buen juego!"); return; }
+                    kuroHabla(personajes['daiki'].frases[Math.floor(Math.random() * personajes['daiki'].frases.length)]);
+                }
+            }, 800);
+        }
 
+        // Eventos de Ajustes
+        document.getElementById('vol-musica').addEventListener('input', (e) => { musica.volume = e.target.value; });
+        document.getElementById('vol-voces').addEventListener('input', (e) => { volumenVoces = parseFloat(e.target.value); });
+        
+        document.getElementById('selector-musica').addEventListener('change', (e) => {
+            musica.src = e.target.value;
+            musica.play().catch(e => console.log("Audio bloqueado"));
+        });
+
+        // Modales
+        function abrirModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function cerrarModal(id) { document.getElementById(id).style.display = 'none'; }
+
+        // Tableros
+        function cambiarTablero(tipo) {
+            tableroHTML.classList.remove('tablero-clasico', 'tablero-madera', 'tablero-marmol', 'tablero-neon', 'tablero-oceano', 'tablero-sangre');
+            tableroHTML.classList.add('tablero-' + tipo);
+            if (tipo === 'clasico') document.body.style.background = "linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%)";
+            if (tipo === 'madera') document.body.style.background = "linear-gradient(135deg, #2b1d14 0%, #1a110b 100%)";
+            if (tipo === 'marmol') document.body.style.background = "linear-gradient(135deg, #2c3e50 0%, #000000 100%)";
+            if (tipo === 'neon') document.body.style.background = "linear-gradient(135deg, #000000 0%, #001a1a 100%)";
+            if (tipo === 'oceano') document.body.style.background = "linear-gradient(135deg, #0a192f 0%, #020c1b 100%)";
+            if (tipo === 'sangre') document.body.style.background = "linear-gradient(135deg, #1a0000 0%, #000000 100%)";
+            cerrarModal('modal-tableros');
+        }
+
+        // Instalación PWA
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+        });
+        function instalarApp() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') console.log('App instalada');
+                    deferredPrompt = null;
+                });
+            } else {
+                alert("Para instalar, usa el menú de tu navegador y selecciona 'Agregar a pantalla de inicio'.");
+            }
+        }
+
+        // Iniciar Juego
         function iniciarJuego(nivel) {
-            nivelActual = nivel;
-            document.getElementById('menu-principal').style.display = 'none';
-            document.getElementById('contenedor-juego').style.display = 'flex';
-            
-            const datosRival = personajes[nivel];
-            document.getElementById('nombre-rival-panel').innerText = nivel === 'humano' ? "Jugador 2" : datosRival.nombre;
+    nivelActual = nivel;colorJugador=document.getElementById('selector-color').value;
+    
+    // --- ESTO FUERZA LA MÚSICA ---
+    musica.volume = parseFloat(document.getElementById('vol-musica').value);
+    musica.play().catch(e => console.log("Música bloqueada"));
+    // ------------------------------
+
+    document.getElementById('menu-principal').style.display = 'none';
+    document.getElementById('contenedor-juego').style.display = 'flex';
+    
+    const datosRival = personajes[nivel];
+    // ... (el resto de tu código sigue igual)
+    document.getElementById('nombre-rival-panel').innerText = nivel === 'humano' ? "Jugador 2" : datosRival.nombre;
             document.getElementById('nivel-rival-panel').innerText = datosRival.dificultad;
             
             const fotoPanel = document.getElementById('foto-rival-panel');
             if (nivel === 'humano') { fotoPanel.style.display = 'none'; } 
             else { fotoPanel.style.display = 'block'; fotoPanel.src = datosRival.foto; }
 
-            musica.volume = parseFloat(document.getElementById('vol-musica').value);
-            musica.play().catch(e => console.log("Música bloqueada"));
             
             if(nivel !== 'humano') kuroHabla(`Soy ${datosRival.nombre}. Veamos qué tienes.`);
-            else mensaje.innerText = "Turno de las Blancas (Jugador 1).";
+            else mensaje.innerText = "Turno de las Blancas.";
             
             reiniciarJuego();
         }
@@ -257,8 +336,7 @@
         function volverAlMenu() {
             document.getElementById('contenedor-juego').style.display = 'none';
             document.getElementById('menu-principal').style.display = 'flex';
-            juego.reset();
-            piezaSeleccionada = null;
+            juego.reset(); piezaSeleccionada = null;
         }
 
         function crearCoordenadas() {
@@ -275,8 +353,8 @@
                 window.speechSynthesis.cancel(); 
                 const voz = new SpeechSynthesisUtterance(texto);
                 voz.lang = 'es-ES'; 
-                voz.pitch = nivelActual === 'yami' ? 1.2 : (nivelActual === 'hikaru' ? 1.1 : 0.8); 
-                voz.volume = window.volumenVoces; 
+                voz.pitch = personajes[nivelActual].pitch; 
+                voz.volume = volumenVoces; 
                 window.speechSynthesis.speak(voz);
             }
         }
@@ -293,7 +371,27 @@
 
         const piezasEmoji = { 'p': '♟', 'r': '♜', 'n': '♞', 'b': '♝', 'q': '♛', 'k': '♚', 'P': '♙', 'R': '♖', 'N': '♘', 'B': '♗', 'Q': '♕', 'K': '♔' };
 
-        function dibujarTablero(coordMovida = null) {
+    
+    function dibujarTablero(coordMovida = null) {
+    // --- AGREGAR ESTO ---
+    if (colorJugador === 'b') {
+        tableroHTML.classList.add('tablero-volteado');
+    } else {
+        tableroHTML.classList.remove('tablero-volteado');
+    }
+    // --------------------
+    
+    tableroHTML.innerHTML = '';
+    // ... (el resto de tu código)
+    if (colorJugador === 'b') {
+        tableroHTML.classList.add('tablero-volteado');
+    } else {
+        tableroHTML.classList.remove('tablero-volteado');
+    }
+    // --------------------
+    
+    tableroHTML.innerHTML = '';
+    // ... (el resto de tu código)
             tableroHTML.innerHTML = '';
             const tableroActual = juego.board(); 
             for (let fila = 0; fila < 8; fila++) {
@@ -327,12 +425,10 @@
 
             if (movimiento.captured) {
                 if (movimiento.color === 'w') {
-                    let pieza = piezasEmoji[movimiento.captured]; 
-                    piezasCapturadas.blancas.push(pieza);
+                    piezasCapturadas.blancas.push(piezasEmoji[movimiento.captured]); 
                     capturasJugadorDiv.innerHTML = piezasCapturadas.blancas.join('');
                 } else {
-                    let pieza = piezasEmoji[movimiento.captured.toUpperCase()]; 
-                    piezasCapturadas.negras.push(pieza);
+                    piezasCapturadas.negras.push(piezasEmoji[movimiento.captured.toUpperCase()]); 
                     capturasRivalDiv.innerHTML = piezasCapturadas.negras.join('');
                 }
             }
@@ -340,20 +436,17 @@
             const historial = juego.history();
             listaMovimientos.innerHTML = '';
             for (let i = 0; i < historial.length; i += 2) {
-                const numJugada = (i / 2) + 1;
-                const movBlanco = historial[i];
-                const movNegro = historial[i + 1] || '';
                 listaMovimientos.innerHTML += `
-                    <div class="mov-num">${numJugada}.</div>
-                    <div class="mov-blanco">${movBlanco}</div>
-                    <div class="mov-negro">${movNegro}</div>
+                    <div class="mov-num">${(i / 2) + 1}.</div>
+                    <div class="mov-blanco">${historial[i]}</div>
+                    <div class="mov-negro">${historial[i + 1] || ''}</div>
                 `;
             }
             listaMovimientos.scrollTop = listaMovimientos.scrollHeight;
         }
 
         function clickCasilla(e) {
-            if (nivelActual !== 'humano' && juego.turn() !== 'w') return;
+            if (nivelActual !== 'humano' && juego.turn() !== colorJugador) return;
             const fila = parseInt(e.target.dataset.fila);
             const col = parseInt(e.target.dataset.col);
             const letras = ['a','b','c','d','e','f','g','h'];
@@ -365,6 +458,16 @@
                 if (piezaEnCasilla && piezaEnCasilla.color === colorTurno) {
                     piezaSeleccionada = coord;
                     e.target.classList.add('seleccionada');
+                    
+                    // Resaltar movimientos posibles si la opción está activa
+                    if (mostrarMovimientos) {
+                        const movs = juego.moves({ square: coord, verbose: true });
+                        movs.forEach(m => {
+                            document.querySelectorAll('.casilla').forEach(c => {
+                                if(c.dataset.fila == (8 - m.to[1]) && c.dataset.col == letras.indexOf(m.to[0])) c.classList.add('movimiento-posible');
+                            });
+                        });
+                    }
                 }
                 return;
             }
@@ -378,17 +481,32 @@
                     actualizarHistorialYCapturas(movimiento);
                     
                     if (juego.game_over()) {
-                        if (juego.in_checkmate()) alert(`¡Jaque Mate! Ganaron las ${juego.turn() === 'w' ? 'Negras' : 'Blancas'}`);
-                        else alert("¡Tablas (Empate)!");
-                        return;
-                    }
+    if (juego.in_checkmate()) {
+        let ganador = juego.turn() === 'w' ? 'Negras' : 'Blancas';
+        let jugadorGano = (colorJugador === 'w' && ganador === 'Blancas') || (colorJugador === 'b' && ganador === 'Negras');
+        
+        if (nivelActual !== 'humano' && !jugadorGano) {
+            kuroHabla("Jaque mate. Otra victoria para mí.");
+        } else {
+            kuroHabla("Jaque mate. Has ganado.");
+        }
+    } else {
+        alert("¡Tablas!");
+    }
+    return;
+}
                     
                     if (nivelActual === 'humano') {
                         mensaje.innerText = juego.turn() === 'w' ? "Turno de las Blancas." : "Turno de las Negras.";
                     } else {
                         mensaje.innerText = `${personajes[nivelActual].nombre} está pensando...`;
-                        kuroMotor.postMessage('position fen ' + juego.fen());
-                        kuroMotor.postMessage('go depth ' + personajes[nivelActual].profundidad);
+                        
+                        if (nivelActual === 'daiki' || nivelActual === 'rem') {
+                            jugarFacil();
+                        } else {
+                            kuroMotor.postMessage('position fen ' + juego.fen());
+                            kuroMotor.postMessage('go depth ' + personajes[nivelActual].profundidad);
+                        }
                     }
                 } else {
                     piezaSeleccionada = null;
@@ -399,10 +517,9 @@
 
         kuroMotor.onmessage = function(event) {
             const linea = event.data;
-            if (linea.startsWith('bestmove') && nivelActual !== 'humano') {
+            if (linea.startsWith('bestmove') && nivelActual !== 'humano' && nivelActual !== 'daiki' && nivelActual !== 'rem') {
                 const movimiento = linea.split(' ')[1];
                 if (movimiento === '(none)') return;
-                
                 const from = movimiento.substring(0, 2);
                 const to = movimiento.substring(2, 4);
                 
@@ -412,10 +529,7 @@
                         reproducirSonido(movKuro.captured ? 'comer' : 'mover');
                         dibujarTablero(to);
                         actualizarHistorialYCapturas(movKuro);
-                        if (juego.game_over()) {
-                            kuroHabla("Jaque mate.");
-                            return;
-                        }
+                        if (juego.game_over()) { kuroHabla("Jaque mate."); return; }
                         const frases = personajes[nivelActual].frases;
                         kuroHabla(frases[Math.floor(Math.random() * frases.length)]);
                     }
@@ -424,36 +538,43 @@
         };
 
         function reiniciarJuego() {
-            juego.reset();
-            piezaSeleccionada = null;
-            ayudasRestantes = 2;
-            piezasCapturadas = { blancas: [], negras: [] };
-            document.getElementById('capturas-jugador').innerHTML = '';
-            document.getElementById('capturas-rival').innerHTML = '';
-            listaMovimientos.innerHTML = '';
-            document.getElementById('btn-ayuda').innerText = "Ayuda (2)";
-            dibujarTablero();
-            if (nivelActual !== 'humano') kuroHabla("¿Otra vez?");
-            else mensaje.innerText = "Turno de las Blancas (Jugador 1).";
+    juego.reset();
+    piezaSeleccionada = null;
+    ayudasRestantes = 2;
+    piezasCapturadas = { blancas: [], negras: [] };
+    document.getElementById('capturas-jugador').innerHTML = '';
+    document.getElementById('capturas-rival').innerHTML = '';
+    listaMovimientos.innerHTML = '';
+    document.getElementById('btn-ayuda').innerText = "Ayuda (2)";
+    dibujarTablero();
+    
+    // Si el jugador es negras, la IA (blancas) mueve primero
+    if (colorJugador === 'b' && nivelActual !== 'humano') {
+        if (nivelActual === 'daiki' || nivelActual === 'rem') {
+            jugarFacil();
+        } else {
+            kuroMotor.postMessage('position fen ' + juego.fen());
+            kuroMotor.postMessage('go depth ' + personajes[nivelActual].profundidad);
         }
+    } else if (nivelActual !== 'humano') {
+        kuroHabla("¿Otra vez?");
+    } else {
+        mensaje.innerText = juego.turn() === 'w' ? "Turno de las Blancas." : "Turno de las Negras.";
+    }
+}
 
         function pedirAyuda() {
             if (juego.turn() !== 'w' || ayudasRestantes === 0) return;
             ayudasRestantes--;
             document.getElementById('btn-ayuda').innerText = `Ayuda (${ayudasRestantes})`;
-            
             kuroMotor.postMessage('position fen ' + juego.fen());
             kuroMotor.postMessage('go depth 10');
-            mensaje.innerText = "Calculando la mejor jugada...";
-            
+            mensaje.innerText = "Calculando...";
             kuroMotor.onmessage = function(event) {
                 const linea = event.data;
                 if (linea.startsWith('bestmove')) {
                     const movimiento = linea.split(' ')[1];
-                    if (movimiento !== '(none)') {
-                        if(nivelActual !== 'humano') kuroHabla(`Mueve de ${movimiento.substring(0, 2)} a ${movimiento.substring(2, 4)}.`);
-                        else mensaje.innerText = `Pista: Mueve de ${movimiento.substring(0, 2)} a ${movimiento.substring(2, 4)}.`;
-                    }
+                    if (movimiento !== '(none)') kuroHabla(`Mueve de ${movimiento.substring(0, 2)} a ${movimiento.substring(2, 4)}.`);
                     kuroMotor.onmessage = juegoNormal;
                 }
             };
@@ -461,12 +582,11 @@
 
         function juegoNormal(event) {
             const linea = event.data;
-            if (linea.startsWith('bestmove') && nivelActual !== 'humano') {
+            if (linea.startsWith('bestmove') && nivelActual !== 'humano' && nivelActual !== 'daiki' && nivelActual !== 'rem') {
                 const movimiento = linea.split(' ')[1];
                 if (movimiento === '(none)') return;
                 const from = movimiento.substring(0, 2);
                 const to = movimiento.substring(2, 4);
-                
                 setTimeout(() => {
                     const movKuro = juego.move({ from: from, to: to, promotion: 'q' });
                     if (movKuro) {
@@ -474,19 +594,66 @@
                         dibujarTablero(to);
                         actualizarHistorialYCapturas(movKuro);
                         if (juego.game_over()) {
-                            kuroHabla("Jaque mate.");
-                            return;
-                        }
+    if (juego.in_checkmate()) {
+        let ganador = juego.turn() === 'w' ? 'Negras' : 'Blancas';
+        let jugadorGano = (colorJugador === 'w' && ganador === 'Blancas') || (colorJugador === 'b' && ganador === 'Negras');
+        
+        if (nivelActual !== 'humano' && !jugadorGano) {
+            kuroHabla("Jaque mate. Otra victoria para mí.");
+        } else {
+            kuroHabla("Jaque mate. Has ganado.");
+        }
+    } else {
+        kuroHabla("Tablas.");
+    }
+    return;
+} 
                         const frases = personajes[nivelActual].frases;
                         kuroHabla(frases[Math.floor(Math.random() * frases.length)]);
                     }
                 }, 800);
             }
         }
+let colorPendiente = null;
 
+document.getElementById('selector-color').addEventListener('change', (e) => {
+    const nuevoColor = e.target.value;
+    
+    // Si está en partida y elige un color diferente
+    if (document.getElementById('contenedor-juego').style.display === 'flex' && nuevoColor !== colorJugador) {
+        colorPendiente = nuevoColor;
+        abrirModal('modal-cambio-color');
+    } else {
+        colorJugador = nuevoColor; // Si no está jugando, se guarda directo
+    }
+});
+
+function confirmarCambioColor() {
+    colorJugador = colorPendiente;
+    cerrarModal('modal-cambio-color');
+    cerrarModal('modal-ajustes'); // Cierra los ajustes para que veas el tablero
+    reiniciarJuego(); // Reinicia y voltea el tablero si es necesario
+}
+
+function cancelarCambioColor() {
+    // Devuelve el selector a su valor original
+    document.getElementById('selector-color').value = colorJugador;
+    colorPendiente = null;
+    cerrarModal('modal-cambio-color');
+}
         kuroMotor.onmessage = juegoNormal;
         crearCoordenadas();
     </script>
+    <!-- MODAL CAMBIO DE COLOR -->
+<div id="modal-cambio-color" class="modal" style="z-index: 2000;">
+    <div class="modal-content">
+        <h2>⚠️ Cambiar Color</h2>
+        <p>¿Estás seguro que quieres cambiar de color?<br>Esta acción reiniciará la partida actual.</p>
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button onclick="confirmarCambioColor()" style="background: #4CAF50; margin: 0;">Aceptar</button>
+            <button onclick="cancelarCambioColor()" style="background: #555; margin: 0;">Cancelar</button>
+        </div>
+    </div>
+</div>
 </body>
 </html>
-    </div>
